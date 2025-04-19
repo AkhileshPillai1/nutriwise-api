@@ -1,38 +1,37 @@
 import { Request, Response } from "express";
-import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { dbClient, USERS_TABLE } from '../utils/dynamoDB.js';
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { generateToken } from "../utils/jwt.js";
+import { User } from "../classes/User.js";
+import { toDynamoDBItem } from "../utils/helpers.js";
 
 
 export const register = async (req: Request, res: Response): Promise<any> => {
-  const { email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   try {
-    const existingUser = await dbClient.send(new GetItemCommand({
+    const existingUser = await dbClient.send(new ScanCommand({
       TableName: USERS_TABLE,
-      Key: {
-        email: { S: email },
+      FilterExpression: "email = :email",
+      ExpressionAttributeValues: {
+        ":email": { S: email },
       },
     }));
 
-    if (existingUser.Item) {
+    if (existingUser.Items.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = uuidv4();
     const createdAt = new Date().toISOString();
 
+    const user = new User(userId, firstName, lastName, email, hashedPassword, createdAt, createdAt);
+
     await dbClient.send(new PutItemCommand({
       TableName: USERS_TABLE,
-      Item: {
-        userId: { S: userId },
-        email: { S: email },
-        passwordHash: { S: hashedPassword },
-        createdAt: { S: createdAt },
-      },
+      Item: toDynamoDBItem(user),
     }));
 
     const token = generateToken(userId);
@@ -47,14 +46,15 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
   try {
-    const result = await dbClient.send(new GetItemCommand({
+    const result = await dbClient.send(new ScanCommand({
       TableName: USERS_TABLE,
-      Key: {
-        email: { S: email },
+      FilterExpression: "email = :email",
+      ExpressionAttributeValues: {
+        ":email": { S: email },
       },
     }));
 
-    const user = result.Item;
+    const user = result.Items.length>0 ? result.Items[0] : null;
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
