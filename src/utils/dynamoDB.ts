@@ -13,6 +13,7 @@ const dbClient = new DynamoDBClient({
   }
 });
 
-const USERS_TABLE = "Users"; // Use table name from .env
+const USERS_TABLE = "Users";
+const DIET_PLANS_TABLE = "DietPlans";
 
-export { dbClient, USERS_TABLE };
+export { dbClient, USERS_TABLE, DIET_PLANS_TABLE };

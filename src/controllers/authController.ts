@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { dbClient, USERS_TABLE } from '../utils/dynamoDB.js';
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { generateToken } from "../utils/jwt.js";
 import { User } from "../classes/User.js";
-import { toDynamoDBItem } from "../utils/helpers.js";
+import { marshall } from "@aws-sdk/util-dynamodb";
 
 
 export const register = async (req: Request, res: Response): Promise<any> => {
@@ -31,7 +31,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
 
     await dbClient.send(new PutItemCommand({
       TableName: USERS_TABLE,
-      Item: toDynamoDBItem(user),
+      Item: marshall(user, { convertClassInstanceToMap: true }),
     }));
 
     const token = generateToken(userId);
@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       },
     }));
 
-    const user = result.Items.length>0 ? result.Items[0] : null;
+    const user = result.Items.length > 0 ? result.Items[0] : null;
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
