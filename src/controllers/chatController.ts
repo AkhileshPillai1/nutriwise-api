@@ -1,5 +1,6 @@
 import { getGeminiResponse } from '../utils/gemini.js';
 import { getChatHistory, addMessage } from '../utils/chatMemory.js';
+import { ChatMessage } from '../classes/ChatMessage.js';
 
 export const sendMessage = async (req, res) => {
 
@@ -11,17 +12,16 @@ export const sendMessage = async (req, res) => {
     }
 
     // Save user message
-    addMessage(userId, 'user', message);
+    await addMessage(new ChatMessage(userId, 'user', message));
 
     // Get updated history
-    const history = getChatHistory(userId);
+    const history = await getChatHistory(userId);
 
     try {
-        console.log('History:', history);
         const geminiResponse = await getGeminiResponse(history);
 
         // Save assistant reply
-        addMessage(userId, 'model', geminiResponse);
+        await addMessage(new ChatMessage(userId, 'model', geminiResponse));
 
         res.json({ response: geminiResponse });
     } catch (error) {

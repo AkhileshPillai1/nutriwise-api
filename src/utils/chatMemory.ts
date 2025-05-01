@@ -1,23 +1,28 @@
-type Message = {
-    role: 'user' | 'model';
-    content: string;
-};
+import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import IChatMessage from "../models/IChatMessage.js";
+import { dbClient, CHAT_MESSAGES_TABLE } from "./dynamoDB.js";
 
-const SYSTEM_MESSAGE = {
-    role: 'user',
-    content: 'Your name is Nutribot. You are a helpful and knowledgeable nutrition expert. Give advice based on current nutrition science. Keep explanations clear and practical.'
-} as const;
+export async function getChatHistory(userId: string): Promise<IChatMessage[]> {
 
-const memoryStore: Record<string, Message[]> = {};
-
-export function getChatHistory(userId: string): Message[] {
-    const history = memoryStore[userId] || [];
-    return [SYSTEM_MESSAGE, ...history];
+    //code to store chat history in a database
+    const cmd = new QueryCommand({
+        TableName: CHAT_MESSAGES_TABLE,
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: {
+          ":uid": userId
+        },
+        ScanIndexForward: true // chronological order
+      });
+    
+      const res = await dbClient.send(cmd);
+      return res.Items as IChatMessage[];
 }
 
-export function addMessage(userId: string, role: 'user' | 'model', content: string): void {
-    if (!memoryStore[userId]) {
-        memoryStore[userId] = [];
-    }
-    memoryStore[userId].push({ role, content });
+export async function addMessage(message: IChatMessage): Promise<void> {
+    const cmd = new PutCommand({
+        TableName: CHAT_MESSAGES_TABLE,
+        Item: message,
+      });
+    
+      await dbClient.send(cmd);
 }
