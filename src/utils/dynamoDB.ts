@@ -15,6 +15,6 @@ const dbClient = new DynamoDBClient({
 
 const USERS_TABLE = "Users";
 const DIET_PLANS_TABLE = "DietPlans";
-const CHAT_MESSAGES_TABLE = "Chat";
+const CHAT_SESSIONS_TABLE = "ChatSession";
 
-export { dbClient, USERS_TABLE, DIET_PLANS_TABLE, CHAT_MESSAGES_TABLE };
+export { dbClient, USERS_TABLE, DIET_PLANS_TABLE, CHAT_SESSIONS_TABLE };

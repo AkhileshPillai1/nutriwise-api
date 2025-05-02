@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateUser } from "../middleware/verifyHeader.js";
-import { sendMessage } from "../controllers/chatController.js";
+import { getChats, sendMessage } from "../controllers/chatController.js";
 // Import neceassary controllers
 //import {  } from "../controllers/chatController.js";
 
@@ -9,5 +9,6 @@ router.use(authenticateUser);
 
 // Define the routes for chat api
 router.post("/sendMessage", sendMessage);
+router.get("/getChats", getChats);
 
 export default router;
