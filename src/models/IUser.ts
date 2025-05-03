@@ -8,7 +8,9 @@ export interface IUser {
     passwordHash: string;
     createdAt: string; // Store dates as ISO strings in DynamoDB
     updatedAt?: string;
-    personalInfo?: IUserPersonalInfo; // Optional field for personal information
+    personalInfo?: IUserPersonalInfo;
+    preferences?: IUserPreferences;
+    medicalInfo?: IUserMedicalInfo; 
   }
   
 export interface IUserPersonalInfo {

@@ -4,6 +4,7 @@ import authRoutes from "./routes/authRoutes.js";
 import dietplanRoutes from "./routes/dietplanRoutes.js";
 import dotenv from 'dotenv';
 import chatRoutes from "./routes/chatRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -20,5 +21,6 @@ app.use(express.json()); // Middleware to parse JSON request body
 app.use("/api/auth", authRoutes);
 app.use("/api/diet", dietplanRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/user", userRoutes);
 
 app.listen(PORT);

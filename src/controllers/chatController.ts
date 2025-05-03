@@ -28,7 +28,7 @@ export const sendMessage = async (req, res) => {
         // Save assistant reply
         await addMessage(new ChatMessage('model', geminiResponse), sessionId);
 
-        res.json({ response: geminiResponse });
+        res.json({ response: geminiResponse, sessionId });
     } catch (error) {
         console.error('Error calling Gemini API:', error);
         res.status(500).json({ error: 'Failed to get response from Gemini' });
@@ -36,7 +36,7 @@ export const sendMessage = async (req, res) => {
 };
 
 export const getChats = async (req, res) => {
-    const sessionId  = req.query.sessionId;
+    const sessionId = req.query.sessionId;
     const history = await getChatHistory(sessionId);
     res.json(history);
 }
